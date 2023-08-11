@@ -38,10 +38,16 @@ class Nodo:
         return self.custo
     
     def calcula_custo(self) -> int: # custo de uma ação para um nodo filho futuro
-        return self.get_custo + 1
+        return self.get_custo() + 1
     
     def isRoot(self) -> bool:
         return self.pai is None
+    
+    def printNodo(self) -> None:
+        print(f"Estado\t= {self.get_estado()}")
+        print(f"Ação\t= {self.get_acao()}")
+        print(f"Pai\t= {self.get_pai()}")
+        print(f"Custo\t= {self.get_custo()}")
 
 def swap(string: str, idx1: int, idx2: int) -> str:
     string_lista = list(string)
