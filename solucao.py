@@ -4,7 +4,7 @@ class Nodo:
     """
     Implemente a classe Nodo com os atributos descritos na funcao init
     """
-    def __init__(self, estado:str, pai:Nodo, acao:str, custo:int):
+    def __init__(self, estado:str, pai, acao:str | None, custo:int):
         """
         Inicializa o nodo com os atributos recebidos
         :param estado:str, representacao do estado do 8-puzzle
@@ -12,11 +12,36 @@ class Nodo:
         :param acao:str, acao a partir do pai que leva a este nodo (None no caso do nó raiz)
         :param custo:int, custo do caminho da raiz até este nó
         """
-        # substitua a linha abaixo pelo seu codigo
-        raise NotImplementedError
+        self.estado = estado
+        self.acao = acao
+        self.pai = pai
+        self.custo = custo
+    
+    def __eq__(self, outro) -> bool:
+        if isinstance(self, outro):
+            return (self.estado == outro.estado and self.acao == outro.acao and self.pai == outro.pai and self.custo == outro.custo) # pode dar ruim a comparacao do pai
+        return False
 
+    def __hash__(self) -> int:
+        return hash((self.estado, self.acao, self.pai, self.custo)) # pode dar ruim o hash do pai
+    
+    def get_estado(self): 
+        return self.estado
+    
+    def get_acao(self): 
+        return self.acao
+    
+    def get_pai(self): 
+        return self.pai
+    
+    def get_custo(self): 
+        return self.custo
+    
+    def incrementa_custo(self):
+        self.custo += 1
+        return
 
-def swap(string, idx1, idx2):
+def swap(string: str, idx1: int, idx2: int) -> str:
     string_lista = list(string)
 
     i1_salvo = string_lista[idx1]
@@ -27,7 +52,7 @@ def swap(string, idx1, idx2):
 
     return string_trocada
 
-def sucessor(estado:str)->Set[Tuple[str,str]]:
+def sucessor(estado:str) -> Set[Tuple[str,str]]:
     """
     Recebe um estado (string) e retorna um conjunto de tuplas (ação,estado atingido)
     para cada ação possível no estado recebido.
@@ -38,6 +63,12 @@ def sucessor(estado:str)->Set[Tuple[str,str]]:
     possiveis_estados = set()
     indice_espaco = estado.index("_")
 
+    """
+    Tabuleiro:
+    0 1 2 
+    3 4 5
+    6 7 8
+    """
     if indice_espaco % 3 != 0: # espaço não está na primeira coluna
         estado_novo = swap(estado, indice_espaco, indice_espaco - 1)
         possiveis_estados.add(("esquerda", estado_novo))
