@@ -18,7 +18,7 @@ class Nodo:
         self.custo = custo
     
     def __eq__(self, outro: "Nodo") -> bool:
-        if isinstance(self, outro):
+        if isinstance(outro, Nodo):
             return (self.estado == outro.estado and self.acao == outro.acao and self.pai == outro.pai and self.custo == outro.custo) # pode dar ruim a comparacao do pai
         return False
 
@@ -80,12 +80,15 @@ def sucessor(estado:str) -> Set[Tuple[str,str]]:
     if indice_espaco % 3 != 0: # espaço não está na primeira coluna
         estado_novo = swap(estado, indice_espaco, indice_espaco - 1)
         possiveis_estados.add(("esquerda", estado_novo))
+
     if (indice_espaco + 1) % 3 != 0: # espaço não está na última coluna
         estado_novo = swap(estado, indice_espaco, indice_espaco + 1)
         possiveis_estados.add(("direita", estado_novo))
+
     if indice_espaco > 2: # espaço não está na primeira linha
         estado_novo = swap(estado, indice_espaco, indice_espaco - 3)
         possiveis_estados.add(("acima", estado_novo))
+
     if indice_espaco < 6: # espaço não está na última linha
         estado_novo = swap(estado, indice_espaco, indice_espaco + 3)
         possiveis_estados.add(("abaixo", estado_novo))
@@ -108,6 +111,13 @@ def expande(nodo:Nodo) -> Set[Nodo]:
         nodos_filhos.add(nodo_filho)
     return nodos_filhos
 
+def calcula_hamming(estado: str) -> int: # distância de Hamming -> número de peças fora do lugar
+    estado_final = "12345678_"
+    hamming = 0
+    for c1, c2 in zip(estado, estado_final):
+        if c1 != c2:
+            hamming += 1
+    return hamming
 
 def astar_hamming(estado:str) -> list[str]:
     """
@@ -118,8 +128,7 @@ def astar_hamming(estado:str) -> list[str]:
     :param estado: str
     :return:
     """
-    # substituir a linha abaixo pelo seu codigo
-    raise NotImplementedError
+    
 
 
 def astar_manhattan(estado:str) -> list[str]:
