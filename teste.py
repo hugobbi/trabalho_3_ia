@@ -1,6 +1,10 @@
 from typing import Iterable, Set, Tuple
 from solucao import *
 
-nodo_raiz = Nodo("2_3541687", None, None, 0)
-nodo_raiz2 = Nodo("2_3541687", None, None, 0)
-filhos = expande(nodo_raiz)
+# 123456_78
+# 2_3541687
+nodo_raiz = Nodo("123456_78", None, None, 0)
+
+caminho = astar_hamming(nodo_raiz.get_estado())
+
+print(caminho)

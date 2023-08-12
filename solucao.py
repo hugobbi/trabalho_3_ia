@@ -2,6 +2,7 @@ from typing import Iterable, Set, Tuple
 import heapq
 from dataclasses import dataclass, field
 
+#@dataclass(order=True)
 class Nodo:
     """
     Implemente a classe Nodo com os atributos descritos na funcao init
@@ -18,6 +19,7 @@ class Nodo:
         self.acao = acao
         self.pai = pai
         self.custo = custo
+        self.custo_heuristica = 0
     
     def __eq__(self, outro: "Nodo") -> bool:
         if isinstance(outro, Nodo):
@@ -26,6 +28,9 @@ class Nodo:
 
     def __hash__(self) -> int:
         return hash((self.estado, self.acao, self.pai, self.custo)) # pode dar ruim o hash do pai
+
+    def __lt__(self, outro):
+        return self.get_custo_heuristica() < outro.get_custo_heuristica()
     
     def get_estado(self) -> str: 
         return self.estado
@@ -38,6 +43,13 @@ class Nodo:
     
     def get_custo(self) -> int: 
         return self.custo
+    
+    def get_custo_heuristica(self) -> int: 
+        return self.custo_heuristica
+    
+    def set_custo_heuristica(self, custo_heuristica) -> None: 
+        self.custo_heuristica = custo_heuristica
+        return
     
     def calcula_custo(self) -> int: # custo de uma ação para um nodo filho futuro
         return self.get_custo() + 1
@@ -146,20 +158,20 @@ def astar_hamming(estado:str) -> list[str]:
     fronteira = [(calcula_heuristica_hamming(nodo_raiz), nodo_raiz)] # fronteira é implementada como min-heap priority queue, cada item é uma tupla
     caminho = []                                                     # (valor, nodo)
     while fronteira: # enquanto tiver nodos na fronteira
-        nodo_atual = fronteira[0]
+        nodo_atual = heapq.heappop(fronteira) # pegar menor custo
+        caminho.append(nodo_atual[1].get_acao())
         if nodo_atual[1].ehEstadoFinal():
-            caminho.append(nodo_atual[1].get_acao())
-            return caminho
-        # retirar nodo do heap
+            return caminho[1:] # remove primeira ação, que sempre é None
         if nodo_atual[1] not in explorados:
             explorados.append(nodo_atual[1])
             # adicionar vizinhos do nodo atual no heap
-            vizinhos = sucessor(nodo_atual[1].get_estado())
-        fronteira = []
-
+            heapq.heapify(fronteira)
+            vizinhos = expande(nodo_atual[1])
+            for vizinho in vizinhos:
+                elemento_fronteira = (calcula_heuristica_hamming(vizinho), vizinho)
+                #print(elemento_fronteira)
+                heapq.heappush(fronteira, elemento_fronteira)
     return None # não há solução
-
-
 
 
 def astar_manhattan(estado:str) -> list[str]:
