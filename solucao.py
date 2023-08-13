@@ -217,7 +217,7 @@ def astar_hamming(estado:str) -> list[str]:
 
         if nodo_atual.ehEstadoFinal():
             #print(f"{len(explorados)=}")
-            return nodo_atual.get_caminho() # remove primeira ação, que sempre é None
+            return nodo_atual.get_caminho()
         
         explorados.add(nodo_atual)
         vizinhos = expande(nodo_atual)
@@ -248,7 +248,7 @@ def astar_manhattan(estado:str) -> list[str]:
 
         if nodo_atual.ehEstadoFinal():
             #print(f"{len(explorados)=}")
-            return nodo_atual.get_caminho() # remove primeira ação, que sempre é None
+            return nodo_atual.get_caminho()
         
         explorados.add(nodo_atual)
         vizinhos = expande(nodo_atual)
