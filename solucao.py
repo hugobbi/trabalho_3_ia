@@ -1,8 +1,7 @@
-from typing import Iterable, Set, Tuple
+from typing import Iterable, Set, Tuple, Callable
 import heapq
-from dataclasses import dataclass, field
+import numpy as np
 
-#@dataclass(order=True)
 class Nodo:
     """
     Implemente a classe Nodo com os atributos descritos na funcao init
@@ -16,18 +15,18 @@ class Nodo:
         :param custo:int, custo do caminho da raiz até este nó
         """
         self.estado = estado
-        self.acao = acao
         self.pai = pai
+        self.acao = acao
         self.custo = custo
         self.custo_heuristica = 0
     
     def __eq__(self, outro: "Nodo") -> bool:
         if isinstance(outro, Nodo):
-            return (self.estado == outro.estado and self.acao == outro.acao and self.pai == outro.pai and self.custo == outro.custo) # pode dar ruim a comparacao do pai
+            return self.get_estado() == outro.get_estado()
         return False
 
     def __hash__(self) -> int:
-        return hash((self.estado, self.acao, self.pai, self.custo)) # pode dar ruim o hash do pai
+        return hash(self.get_estado()) 
 
     def __lt__(self, outro):
         return self.get_custo_heuristica() < outro.get_custo_heuristica()
@@ -47,9 +46,8 @@ class Nodo:
     def get_custo_heuristica(self) -> int: 
         return self.custo_heuristica
     
-    def set_custo_heuristica(self, custo_heuristica) -> None: 
-        self.custo_heuristica = custo_heuristica
-        return
+    def set_custo_heuristica(self, calculo_heuristica: Callable[["Nodo"], int]) -> None: 
+        self.custo_heuristica = calculo_heuristica(self)
     
     def calcula_custo(self) -> int: # custo de uma ação para um nodo filho futuro
         return self.get_custo() + 1
@@ -66,10 +64,6 @@ class Nodo:
         print(f"Pai\t= {self.get_pai()}")
         print(f"Custo\t= {self.get_custo()}")
 
-@dataclass(order=True)
-class NodoFronteira(Nodo): # talvez seja usado, mas acho que não
-    def __init_subclass__(cls) -> None:
-        return super().__init_subclass__()
 
 def swap(string: str, idx1: int, idx2: int) -> str:
     string_lista = list(string)
@@ -128,8 +122,8 @@ def expande(nodo:Nodo) -> Set[Nodo]:
     estado_nodo = nodo.get_estado()
     possiveis_estados = sucessor(estado_nodo)
     nodos_filhos = set()
-    for estado in possiveis_estados:
-        nodo_filho = Nodo(estado[1], nodo, estado[0], nodo.calcula_custo())
+    for acao, estado in possiveis_estados:
+        nodo_filho = Nodo(estado, nodo, acao, nodo.calcula_custo())
         nodos_filhos.add(nodo_filho)
     return nodos_filhos
 
@@ -153,24 +147,25 @@ def astar_hamming(estado:str) -> list[str]:
     :param estado: str
     :return:
     """
-    explorados = []
     nodo_raiz = Nodo(estado, None, None, 0) # nodo inicial
-    fronteira = [(calcula_heuristica_hamming(nodo_raiz), nodo_raiz)] # fronteira é implementada como min-heap priority queue, cada item é uma tupla
-    caminho = []                                                     # (valor, nodo)
+    nodo_raiz.set_custo_heuristica(calcula_heuristica_hamming)
+    fronteira = [(nodo_raiz, [])] # fronteira é implementada como min-heap priority queue
+    explorados = set()                                                
     while fronteira: # enquanto tiver nodos na fronteira
-        nodo_atual = heapq.heappop(fronteira) # pegar menor custo
-        caminho.append(nodo_atual[1].get_acao())
-        if nodo_atual[1].ehEstadoFinal():
-            return caminho[1:] # remove primeira ação, que sempre é None
-        if nodo_atual[1] not in explorados:
-            explorados.append(nodo_atual[1])
-            # adicionar vizinhos do nodo atual no heap
-            heapq.heapify(fronteira)
-            vizinhos = expande(nodo_atual[1])
-            for vizinho in vizinhos:
-                elemento_fronteira = (calcula_heuristica_hamming(vizinho), vizinho)
-                #print(elemento_fronteira)
-                heapq.heappush(fronteira, elemento_fronteira)
+        nodo_atual, caminho = heapq.heappop(fronteira) # pegar menor custo
+
+        if nodo_atual.ehEstadoFinal():
+            return caminho # remove primeira ação, que sempre é None
+        
+        explorados.add(nodo_atual)
+        vizinhos = expande(nodo_atual)
+        for vizinho in vizinhos:
+            if vizinho not in explorados:
+                vizinho.set_custo_heuristica(calcula_heuristica_hamming)
+                heapq.heappush(fronteira, (vizinho, caminho + [vizinho.get_acao()])) # adicionar vizinhos do nodo atual no heap
+        #print(f"{caminho=}")
+        print(f"{len(fronteira)=}")
+
     return None # não há solução
 
 
