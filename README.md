@@ -14,11 +14,11 @@ Algoritmos:
 Entrada: 2_3541687
 
 A* Hamming:
-Nós espandidos = 10.689 nós
+Nós expandidos = 10.689 nós
 Custo = 23 ações
 Tempo de execução = 0,129973 segundos
 
 A* Manhattan:
-Nós espandidos = 1.533 nós
+Nós expandidos = 1.533 nós
 Custo = 23 ações
 Tempo de execução = 0,023305 segundos
