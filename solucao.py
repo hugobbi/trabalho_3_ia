@@ -19,6 +19,7 @@ class Nodo:
         self.acao = acao
         self.custo = custo
         self.custo_heuristica = 0
+        self.caminho = [] # cada nodo possui um caminho da raiz, passando por seu pai, até ele
     
     def __eq__(self, outro: "Nodo") -> bool:
         if isinstance(outro, Nodo):
@@ -46,8 +47,14 @@ class Nodo:
     def get_custo_heuristica(self) -> int: 
         return self.custo_heuristica
     
+    def get_caminho(self) -> list[str]:
+        return self.caminho
+
     def set_custo_heuristica(self, calculo_heuristica: Callable[["Nodo"], int]) -> None: 
         self.custo_heuristica = calculo_heuristica(self)
+
+    def construir_caminho(self, caminho_pai: list[str]) -> None:
+        self.caminho = caminho_pai + [self.get_acao()]
     
     def calcula_custo(self) -> int: # custo de uma ação para um nodo filho futuro
         return self.get_custo() + 1
@@ -149,22 +156,22 @@ def astar_hamming(estado:str) -> list[str]:
     """
     nodo_raiz = Nodo(estado, None, None, 0) # nodo inicial
     nodo_raiz.set_custo_heuristica(calcula_heuristica_hamming)
-    fronteira = [(nodo_raiz, [])] # fronteira é implementada como min-heap priority queue
-    explorados = set()                                                
+    fronteira = [nodo_raiz] # fronteira é implementada como min-heap priority queue
+    explorados = set() # eh muito mais rapido usar not in com set                                               
     while fronteira: # enquanto tiver nodos na fronteira
-        nodo_atual, caminho = heapq.heappop(fronteira) # pegar menor custo
+        nodo_atual = heapq.heappop(fronteira) # pegar menor custo
 
         if nodo_atual.ehEstadoFinal():
-            return caminho # remove primeira ação, que sempre é None
+            return nodo_atual.get_caminho() # remove primeira ação, que sempre é None
         
         explorados.add(nodo_atual)
         vizinhos = expande(nodo_atual)
         for vizinho in vizinhos:
             if vizinho not in explorados:
-                vizinho.set_custo_heuristica(calcula_heuristica_hamming)
-                heapq.heappush(fronteira, (vizinho, caminho + [vizinho.get_acao()])) # adicionar vizinhos do nodo atual no heap
-        #print(f"{caminho=}")
-        print(f"{len(fronteira)=}")
+                vizinho.set_custo_heuristica(calcula_heuristica_hamming) # pode ficar no construtor, mas resolvi colocar separado
+                vizinho.construir_caminho(nodo_atual.get_caminho()) # pode ficar no construtor, mas resolvi colocar separado
+                heapq.heappush(fronteira, vizinho) # adicionar vizinhos do nodo atual no heap
+        #print(f"{len(fronteira)=}")
 
     return None # não há solução
 
