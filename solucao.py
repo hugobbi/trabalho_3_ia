@@ -1,6 +1,5 @@
 from typing import Iterable, Set, Tuple, Callable
 import heapq
-import numpy as np
 
 class Nodo:
     """
@@ -83,6 +82,7 @@ def swap(string: str, idx1: int, idx2: int) -> str:
 
     return string_trocada
 
+
 def sucessor(estado:str) -> Set[Tuple[str,str]]:
     """
     Recebe um estado (string) e retorna um conjunto de tuplas (ação,estado atingido)
@@ -142,6 +142,7 @@ def calcula_soma_hamming(estado: str) -> int: # distância de Hamming -> número
             hamming += 1
     return hamming
 
+
 def calcula_soma_manhattan(estado: str) -> int:
     '''
     Estado final:
@@ -198,6 +199,7 @@ def calcula_soma_manhattan(estado: str) -> int:
                 raise Exception("Erro com a formatação do tabuleiro")
     return soma_distancia_manhattan
 
+
 def astar_hamming(estado:str) -> list[str]:
     """
     Recebe um estado (string), executa a busca A* com h(n) = soma das distâncias de Hamming e
@@ -224,7 +226,6 @@ def astar_hamming(estado:str) -> list[str]:
                 vizinho.calcula_funcao_valor(calcula_soma_hamming) # pode ficar no construtor, mas resolvi colocar separado (calcula heuristica)
                 vizinho.construir_caminho(nodo_atual.get_caminho()) # pode ficar no construtor, mas resolvi colocar separado (computa caminho)
                 heapq.heappush(fronteira, vizinho) # adicionar vizinhos do nodo atual no heap
-        #print(f"{len(fronteira)=}")
 
     return None # não há solução
 
@@ -255,7 +256,6 @@ def astar_manhattan(estado:str) -> list[str]:
                 vizinho.calcula_funcao_valor(calcula_soma_manhattan) # pode ficar no construtor, mas resolvi colocar separado (calcula heuristica)
                 vizinho.construir_caminho(nodo_atual.get_caminho()) # pode ficar no construtor, mas resolvi colocar separado (computa caminho)
                 heapq.heappush(fronteira, vizinho) # adicionar vizinhos do nodo atual no heap
-        #print(f"{len(fronteira)=}")
 
     return None # não há solução
 
