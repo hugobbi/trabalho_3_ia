@@ -154,44 +154,43 @@ def calcula_soma_manhattan(estado: str) -> int:
     12345678_
     '''
     soma_distancia_manhattan = 0
-    for i in estado:
-        i = 8 if i == "_" else int(i) - 1 # transforma string do tabueiro em int
+    for i in range(len(estado)):
         x_pos = i // 3
         y_pos = i % 3
-        match i:
-            case 0: # (0, 0)
+        match estado[i]:
+            case "1": # (0, 0)
                 x = abs(x_pos - 0)
                 y = abs(y_pos - 0)
                 soma_distancia_manhattan += x + y
-            case 1: # (0, 1)
+            case "2": # (0, 1)
                 x = abs(x_pos - 0)
                 y = abs(y_pos - 1)
                 soma_distancia_manhattan += x + y
-            case 2: # (0, 2)
+            case "3": # (0, 2)
                 x = abs(x_pos - 0)
                 y = abs(y_pos - 2)
                 soma_distancia_manhattan += x + y
-            case 3: # (1, 0)
+            case "4": # (1, 0)
                 x = abs(x_pos - 1)
                 y = abs(y_pos - 0)
                 soma_distancia_manhattan += x + y
-            case 4: # (1, 1)
+            case "5": # (1, 1)
                 x = abs(x_pos - 1)
                 y = abs(y_pos - 1)
                 soma_distancia_manhattan += x + y
-            case 5: # (1, 2)
+            case "6": # (1, 2)
                 x = abs(x_pos - 1)
                 y = abs(y_pos - 2)
                 soma_distancia_manhattan += x + y
-            case 6: # (2, 0)
+            case "7": # (2, 0)
                 x = abs(x_pos - 2)
                 y = abs(y_pos - 0)
                 soma_distancia_manhattan += x + y
-            case 7: # (2, 1)
+            case "8": # (2, 1)
                 x = abs(x_pos - 2)
                 y = abs(y_pos - 1)
                 soma_distancia_manhattan += x + y
-            case 8: # (2, 2)
+            case "_": # (2, 2)
                 x = abs(x_pos - 2)
                 y = abs(y_pos - 2)
                 soma_distancia_manhattan += x + y
@@ -217,6 +216,7 @@ def astar_hamming(estado:str) -> list[str]:
         nodo_atual = heapq.heappop(fronteira) # pegar menor custo
 
         if nodo_atual.ehEstadoFinal():
+            #print(f"{len(explorados)=}")
             return nodo_atual.get_caminho() # remove primeira ação, que sempre é None
         
         explorados.add(nodo_atual)
@@ -247,6 +247,7 @@ def astar_manhattan(estado:str) -> list[str]:
         nodo_atual = heapq.heappop(fronteira) # pegar menor custo
 
         if nodo_atual.ehEstadoFinal():
+            #print(f"{len(explorados)=}")
             return nodo_atual.get_caminho() # remove primeira ação, que sempre é None
         
         explorados.add(nodo_atual)
