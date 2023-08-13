@@ -50,8 +50,8 @@ class Nodo:
     def get_caminho(self) -> list[str]:
         return self.caminho
 
-    def set_custo_heuristica(self, calculo_heuristica: Callable[["Nodo"], int]) -> None: 
-        self.custo_heuristica = calculo_heuristica(self)
+    def calcula_funcao_valor(self, calculo_heuristica: Callable[["Nodo"], int]) -> None: 
+        self.custo_heuristica = self.get_custo() + calculo_heuristica(self.get_estado())
 
     def construir_caminho(self, caminho_pai: list[str]) -> None:
         self.caminho = caminho_pai + [self.get_acao()]
@@ -134,7 +134,7 @@ def expande(nodo:Nodo) -> Set[Nodo]:
         nodos_filhos.add(nodo_filho)
     return nodos_filhos
 
-def calcula_hamming(estado: str) -> int: # distância de Hamming -> número de peças fora do lugar
+def calcula_soma_hamming(estado: str) -> int: # distância de Hamming -> número de peças fora do lugar
     estado_final = "12345678_"
     hamming = 0
     for c1, c2 in zip(estado, estado_final):
@@ -142,8 +142,61 @@ def calcula_hamming(estado: str) -> int: # distância de Hamming -> número de p
             hamming += 1
     return hamming
 
-def calcula_heuristica_hamming(nodo: Nodo) -> int:
-    return nodo.get_custo() + calcula_hamming(nodo.get_estado())
+def calcula_soma_manhattan(estado: str) -> int:
+    '''
+    Estado final:
+      0 1 2
+    0 1 2 3
+    1 4 5 6
+    2 7 8 _
+   
+    12345678_
+    '''
+    soma_distancia_manhattan = 0
+    for i in estado:
+        i = 8 if i == "_" else int(i) - 1 # transforma string do tabueiro em int
+        x_pos = i // 3
+        y_pos = i % 3
+        match i:
+            case 0: # (0, 0)
+                x = abs(x_pos - 0)
+                y = abs(y_pos - 0)
+                soma_distancia_manhattan += x + y
+            case 1: # (0, 1)
+                x = abs(x_pos - 0)
+                y = abs(y_pos - 1)
+                soma_distancia_manhattan += x + y
+            case 2: # (0, 2)
+                x = abs(x_pos - 0)
+                y = abs(y_pos - 2)
+                soma_distancia_manhattan += x + y
+            case 3: # (1, 0)
+                x = abs(x_pos - 1)
+                y = abs(y_pos - 0)
+                soma_distancia_manhattan += x + y
+            case 4: # (1, 1)
+                x = abs(x_pos - 1)
+                y = abs(y_pos - 1)
+                soma_distancia_manhattan += x + y
+            case 5: # (1, 2)
+                x = abs(x_pos - 1)
+                y = abs(y_pos - 2)
+                soma_distancia_manhattan += x + y
+            case 6: # (2, 0)
+                x = abs(x_pos - 2)
+                y = abs(y_pos - 0)
+                soma_distancia_manhattan += x + y
+            case 7: # (2, 1)
+                x = abs(x_pos - 2)
+                y = abs(y_pos - 1)
+                soma_distancia_manhattan += x + y
+            case 8: # (2, 2)
+                x = abs(x_pos - 2)
+                y = abs(y_pos - 2)
+                soma_distancia_manhattan += x + y
+            case _:
+                raise Exception("Erro com a formatação do tabuleiro")
+    return soma_distancia_manhattan
 
 def astar_hamming(estado:str) -> list[str]:
     """
@@ -155,7 +208,7 @@ def astar_hamming(estado:str) -> list[str]:
     :return:
     """
     nodo_raiz = Nodo(estado, None, None, 0) # nodo inicial
-    nodo_raiz.set_custo_heuristica(calcula_heuristica_hamming)
+    nodo_raiz.calcula_funcao_valor(calcula_soma_hamming)
     fronteira = [nodo_raiz] # fronteira é implementada como min-heap priority queue
     explorados = set() # eh muito mais rapido usar not in com set                                               
     while fronteira: # enquanto tiver nodos na fronteira
@@ -168,8 +221,8 @@ def astar_hamming(estado:str) -> list[str]:
         vizinhos = expande(nodo_atual)
         for vizinho in vizinhos:
             if vizinho not in explorados:
-                vizinho.set_custo_heuristica(calcula_heuristica_hamming) # pode ficar no construtor, mas resolvi colocar separado
-                vizinho.construir_caminho(nodo_atual.get_caminho()) # pode ficar no construtor, mas resolvi colocar separado
+                vizinho.calcula_funcao_valor(calcula_soma_hamming) # pode ficar no construtor, mas resolvi colocar separado (calcula heuristica)
+                vizinho.construir_caminho(nodo_atual.get_caminho()) # pode ficar no construtor, mas resolvi colocar separado (computa caminho)
                 heapq.heappush(fronteira, vizinho) # adicionar vizinhos do nodo atual no heap
         #print(f"{len(fronteira)=}")
 
@@ -185,8 +238,26 @@ def astar_manhattan(estado:str) -> list[str]:
     :param estado: str
     :return:
     """
-    # substituir a linha abaixo pelo seu codigo
-    raise NotImplementedError
+    nodo_raiz = Nodo(estado, None, None, 0) # nodo inicial
+    nodo_raiz.calcula_funcao_valor(calcula_soma_manhattan)
+    fronteira = [nodo_raiz] # fronteira é implementada como min-heap priority queue
+    explorados = set() # eh muito mais rapido usar not in com set                                               
+    while fronteira: # enquanto tiver nodos na fronteira
+        nodo_atual = heapq.heappop(fronteira) # pegar menor custo
+
+        if nodo_atual.ehEstadoFinal():
+            return nodo_atual.get_caminho() # remove primeira ação, que sempre é None
+        
+        explorados.add(nodo_atual)
+        vizinhos = expande(nodo_atual)
+        for vizinho in vizinhos:
+            if vizinho not in explorados:
+                vizinho.calcula_funcao_valor(calcula_soma_manhattan) # pode ficar no construtor, mas resolvi colocar separado (calcula heuristica)
+                vizinho.construir_caminho(nodo_atual.get_caminho()) # pode ficar no construtor, mas resolvi colocar separado (computa caminho)
+                heapq.heappush(fronteira, vizinho) # adicionar vizinhos do nodo atual no heap
+        #print(f"{len(fronteira)=}")
+
+    return None # não há solução
 
 def bfs(estado:str) -> list[str]:
     """
