@@ -216,7 +216,6 @@ def astar_hamming(estado:str) -> list[str]:
         nodo_atual = heapq.heappop(fronteira) # pegar menor custo
 
         if nodo_atual.ehEstadoFinal():
-            #print(f"{len(explorados)=}")
             return nodo_atual.get_caminho()
         
         explorados.add(nodo_atual)
@@ -247,7 +246,6 @@ def astar_manhattan(estado:str) -> list[str]:
         nodo_atual = heapq.heappop(fronteira) # pegar menor custo
 
         if nodo_atual.ehEstadoFinal():
-            #print(f"{len(explorados)=}")
             return nodo_atual.get_caminho()
         
         explorados.add(nodo_atual)
